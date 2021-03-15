@@ -69,6 +69,9 @@ class ExtendedImageEditorState extends State<ExtendedImageEditor> {
               widget.extendedImageState.extendedImageInfo.image.height;
     }
     _editActionDetails.cropAspectRatio = _editorConfig.cropAspectRatio;
+    _editActionDetails.initialCropAspectRatio =
+        _editorConfig.initialCropAspectRatio;
+
     if (_editorConfig.cropAspectRatio != null &&
         _editorConfig.cropAspectRatio <= 0) {
       _editActionDetails.cropAspectRatio =
@@ -137,7 +140,7 @@ class ExtendedImageEditorState extends State<ExtendedImageEditor> {
                               .extendedImageState.extendedImageInfo.image.height
                               .toDouble()),
                       flipHorizontally: false,
-                      fit: BoxFit.fitWidth,
+                      fit: widget.extendedImageState.imageWidget.fit,
                       centerSlice:
                           widget.extendedImageState.imageWidget.centerSlice,
                       alignment:
@@ -196,19 +199,15 @@ class ExtendedImageEditorState extends State<ExtendedImageEditor> {
   Rect _initCropRect(Rect rect) {
     Rect cropRect = _editActionDetails.getRectWithScale(rect);
 
-    if (_editActionDetails.cropAspectRatio != null) {
-      final double aspectRatio = _editActionDetails.cropAspectRatio;
+    if (_editActionDetails.initialCropAspectRatio != null) {
+      final double aspectRatio = _editActionDetails.initialCropAspectRatio;
       double width = cropRect.width / aspectRatio;
       final double height = min(cropRect.height, width);
       width = height * aspectRatio;
-      cropRect =
-          Rect.fromCenter(center: cropRect.center, width: width, height: 40.0);
+      cropRect = Rect.fromCenter(
+          center: cropRect.center, width: width - 30, height: height - 30);
     }
-
-    return Rect.fromCenter(
-        center: cropRect.center,
-        width: cropRect.width - 30.0,
-        height: min(80.0, cropRect.height));
+    return cropRect;
   }
 
   void _handleScaleStart(ScaleStartDetails details) {
