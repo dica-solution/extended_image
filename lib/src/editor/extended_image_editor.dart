@@ -105,8 +105,8 @@ class ExtendedImageEditorState extends State<ExtendedImageEditor> {
     );
 
     Widget result = GestureDetector(
-        onScaleStart: _handleScaleStart,
-        onScaleUpdate: _handleScaleUpdate,
+        // onScaleStart: _handleScaleStart,
+        // onScaleUpdate: _handleScaleUpdate,
         behavior: _editorConfig?.hitTestBehavior,
         child: Stack(
           children: <Widget>[
@@ -137,7 +137,7 @@ class ExtendedImageEditorState extends State<ExtendedImageEditor> {
                               .extendedImageState.extendedImageInfo.image.height
                               .toDouble()),
                       flipHorizontally: false,
-                      fit: widget.extendedImageState.imageWidget.fit,
+                      fit: BoxFit.fitWidth,
                       centerSlice:
                           widget.extendedImageState.imageWidget.centerSlice,
                       alignment:
@@ -201,10 +201,14 @@ class ExtendedImageEditorState extends State<ExtendedImageEditor> {
       double width = cropRect.width / aspectRatio;
       final double height = min(cropRect.height, width);
       width = height * aspectRatio;
-      cropRect = Rect.fromCenter(
-          center: cropRect.center, width: width, height: height);
+      cropRect =
+          Rect.fromCenter(center: cropRect.center, width: width, height: 40.0);
     }
-    return cropRect;
+
+    return Rect.fromCenter(
+        center: cropRect.center,
+        width: cropRect.width - 30.0,
+        height: min(80.0, cropRect.height));
   }
 
   void _handleScaleStart(ScaleStartDetails details) {

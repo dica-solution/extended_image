@@ -95,24 +95,40 @@ class EditActionDetails {
     //     rotateRect(screenDestinationRect, screenCropRect.center, -angle);
 
     /// take care of boundary
-    final Rect newCropRect = getDestinationRect(
-        rect: layoutRect,
-        inputSize: Size(cropRect.height, cropRect.width),
-        fit: fit);
-
-    final double scale = newCropRect.width / cropRect.height;
+    ///
+    // final double scale =
+    //     screenDestinationRect.width / screenDestinationRect.height;
 
     Rect newScreenDestinationRect =
-        rotateRect(screenDestinationRect, screenCropRect.center, angle);
+        rotateRect(screenDestinationRect, _layoutRect.center, angle);
 
-    final Offset topLeft = screenCropRect.center -
-        (screenCropRect.center - newScreenDestinationRect.topLeft) * scale;
-    final Offset bottomRight = screenCropRect.center +
-        -(screenCropRect.center - newScreenDestinationRect.bottomRight) * scale;
+    var newScreenDestinationRectSize = applyBoxFit(
+        BoxFit.contain, newScreenDestinationRect.size, _layoutRect.size);
+    newScreenDestinationRect = Rect.fromCenter(
+        center: newScreenDestinationRect.center,
+        width: newScreenDestinationRectSize.destination.width,
+        height: newScreenDestinationRectSize.destination.height);
 
-    newScreenDestinationRect = Rect.fromPoints(topLeft, bottomRight);
+    final double scale =
+        newScreenDestinationRect.width / screenDestinationRect.height;
 
-    cropRect = newCropRect;
+    // final Offset topLeft = _layoutRect.center -
+    //     (_layoutRect.center - newScreenDestinationRect.topLeft) * scale;
+    // final bottomRight = _layoutRect.center +
+    //     -(_layoutRect.center - newScreenDestinationRect.bottomRight) * scale;
+
+    // newScreenDestinationRect = Rect.fromPoints(topLeft, bottomRight);
+
+    final Rect newCropRect =
+        rotateRect(screenCropRect, _layoutRect.center, angle);
+
+    final Offset cropTopLeft =
+        _layoutRect.center - (_layoutRect.center - newCropRect.topLeft) * scale;
+    final Offset cropBottomRight = _layoutRect.center +
+        -(_layoutRect.center - newCropRect.bottomRight) * scale;
+
+    cropRect =
+        Rect.fromPoints(cropTopLeft, cropBottomRight).shift(-layoutTopLeft);
     _screenDestinationRect = newScreenDestinationRect;
     totalScale *= scale;
     preTotalScale = totalScale;
@@ -252,43 +268,43 @@ class EditActionDetails {
         delta = Offset.zero;
       }
 
-      _screenDestinationRect =
-          computeBoundary(_screenDestinationRect, screenCropRect);
+      // _screenDestinationRect =
+      //     computeBoundary(_screenDestinationRect, screenCropRect);
 
       // make sure that crop rect is all in image rect.
-      if (screenCropRect != null) {
-        Rect rect = screenCropRect.expandToInclude(_screenDestinationRect);
-        if (rect != _screenDestinationRect) {
-          final bool topSame = doubleEqual(rect.top, screenCropRect.top);
-          final bool leftSame = doubleEqual(rect.left, screenCropRect.left);
-          final bool bottomSame =
-              doubleEqual(rect.bottom, screenCropRect.bottom);
-          final bool rightSame = doubleEqual(rect.right, screenCropRect.right);
+      // if (screenCropRect != null) {
+      //   Rect rect = screenCropRect.expandToInclude(_screenDestinationRect);
+      //   if (rect != _screenDestinationRect) {
+      //     final bool topSame = doubleEqual(rect.top, screenCropRect.top);
+      //     final bool leftSame = doubleEqual(rect.left, screenCropRect.left);
+      //     final bool bottomSame =
+      //         doubleEqual(rect.bottom, screenCropRect.bottom);
+      //     final bool rightSame = doubleEqual(rect.right, screenCropRect.right);
 
-          // make sure that image rect keep same aspect ratio
-          if (topSame && bottomSame) {
-            rect = Rect.fromCenter(
-                center: rect.center,
-                width: rect.height /
-                    _screenDestinationRect.height *
-                    _screenDestinationRect.width,
-                height: rect.height);
-            _reachCropRectEdge = true;
-          } else if (leftSame && rightSame) {
-            rect = Rect.fromCenter(
-              center: rect.center,
-              width: rect.width,
-              height: rect.width /
-                  _screenDestinationRect.width *
-                  _screenDestinationRect.height,
-            );
-            _reachCropRectEdge = true;
-          }
-          totalScale = totalScale / (rect.width / _screenDestinationRect.width);
-          preTotalScale = totalScale;
-          _screenDestinationRect = rect;
-        }
-      }
+      //     // make sure that image rect keep same aspect ratio
+      //     if (topSame && bottomSame) {
+      //       rect = Rect.fromCenter(
+      //           center: rect.center,
+      //           width: rect.height /
+      //               _screenDestinationRect.height *
+      //               _screenDestinationRect.width,
+      //           height: rect.height);
+      //       _reachCropRectEdge = true;
+      //     } else if (leftSame && rightSame) {
+      //       rect = Rect.fromCenter(
+      //         center: rect.center,
+      //         width: rect.width,
+      //         height: rect.width /
+      //             _screenDestinationRect.width *
+      //             _screenDestinationRect.height,
+      //       );
+      //       _reachCropRectEdge = true;
+      //     }
+      //     totalScale = totalScale / (rect.width / _screenDestinationRect.width);
+      //     preTotalScale = totalScale;
+      //     _screenDestinationRect = rect;
+      //   }
+      // }
     } else {
       _screenDestinationRect = getRectWithScale(_rawDestinationRect);
       _screenDestinationRect =
@@ -469,7 +485,7 @@ Rect getDestinationRect({
   bool flipHorizontally = false,
 }) {
   Size outputSize = rect.size;
-
+  fit = BoxFit.fitWidth;
   Offset sliceBorder;
   if (centerSlice != null) {
     sliceBorder = Offset(centerSlice.left + inputSize.width - centerSlice.right,
