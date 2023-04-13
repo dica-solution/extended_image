@@ -17,7 +17,8 @@ enum _MoveType {
   top,
   right,
   bottom,
-  left
+  left,
+  center
 }
 
 class ExtendedImageCropLayer extends StatefulWidget {
@@ -114,6 +115,23 @@ class ExtendedImageCropLayerState extends State<ExtendedImageCropLayer>
       ),
       child: Stack(
         children: <Widget>[
+          //center
+          Positioned(
+            top: cropRect!.top + gWidth,
+            left: cropRect!.left + gWidth,
+            child: Container(
+              width: cropRect!.width - 2 * gWidth,
+              height: cropRect!.height - 2 * gWidth,
+              child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onPanUpdate: (DragUpdateDetails details) {
+                    moveUpdate(_MoveType.center, details.delta);
+                  },
+                  onPanEnd: (_) {
+                    _moveEnd(_MoveType.center);
+                  }),
+            ),
+          ),
           //top left
           Positioned(
             top: cropRect!.top - gWidth,
@@ -317,6 +335,19 @@ class ExtendedImageCropLayerState extends State<ExtendedImageCropLayer>
             max(bottomLeft.dy, result.top + gWidth * 2));
         result = Rect.fromPoints(bottomLeft, result.topRight);
         break;
+      case _MoveType.center:
+        result = result!.shift(delta);
+        final Offset topLeft = Offset(
+            max(result.left, layerDestinationRect!.left),
+            max(result.top, layerDestinationRect.top));
+        result =
+            Rect.fromLTWH(topLeft.dx, topLeft.dy, result.width, result.height);
+        final Offset bottomRight = Offset(
+            min(result.right, layerDestinationRect.right),
+            min(result.bottom, layerDestinationRect.bottom));
+        result = Rect.fromLTRB(bottomRight.dx - result.width,
+            bottomRight.dy - result.height, bottomRight.dx, bottomRight.dy);
+        break;
       default:
     }
 
@@ -485,6 +516,8 @@ class ExtendedImageCropLayerState extends State<ExtendedImageCropLayer>
     if (isAnimating) {
       return;
     }
+
+    return;
     _timer = Timer.periodic(widget.editorConfig.tickerDuration, (Timer timer) {
       _timer?.cancel();
 

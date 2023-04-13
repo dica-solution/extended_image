@@ -37,6 +37,8 @@ class EditActionDetails {
     return null;
   }
 
+  double? initialCropAspectRatio;
+
   set cropAspectRatio(double? value) {
     _cropAspectRatio = value;
   }
@@ -98,26 +100,40 @@ class EditActionDetails {
     //     rotateRect(screenDestinationRect, screenCropRect.center, -angle);
 
     /// take care of boundary
-    final Rect newCropRect = getDestinationRect(
-      rect: layoutRect,
-      inputSize: Size(cropRect!.height, cropRect!.width),
-      fit: fit,
-    );
-
-    final double scale = newCropRect.width / cropRect!.height;
+    ///
+    // final double scale =
+    //     screenDestinationRect.width / screenDestinationRect.height;
 
     Rect newScreenDestinationRect =
-        rotateRect(screenDestinationRect!, screenCropRect!.center, angle);
+        rotateRect(screenDestinationRect!, _layoutRect!.center, angle);
 
-    final Offset topLeft = screenCropRect!.center -
-        (screenCropRect!.center - newScreenDestinationRect.topLeft) * scale;
-    final Offset bottomRight = screenCropRect!.center +
-        -(screenCropRect!.center - newScreenDestinationRect.bottomRight) *
-            scale;
+    final FittedSizes newScreenDestinationRectSize = applyBoxFit(
+        BoxFit.contain, newScreenDestinationRect.size, _layoutRect!.size);
+    newScreenDestinationRect = Rect.fromCenter(
+        center: newScreenDestinationRect.center,
+        width: newScreenDestinationRectSize.destination.width,
+        height: newScreenDestinationRectSize.destination.height);
 
-    newScreenDestinationRect = Rect.fromPoints(topLeft, bottomRight);
+    final double scale =
+        newScreenDestinationRect.width / screenDestinationRect!.height;
 
-    cropRect = newCropRect;
+    // final Offset topLeft = _layoutRect.center -
+    //     (_layoutRect.center - newScreenDestinationRect.topLeft) * scale;
+    // final bottomRight = _layoutRect.center +
+    //     -(_layoutRect.center - newScreenDestinationRect.bottomRight) * scale;
+
+    // newScreenDestinationRect = Rect.fromPoints(topLeft, bottomRight);
+
+    final Rect newCropRect =
+        rotateRect(screenCropRect!, _layoutRect!.center, angle);
+
+    final Offset cropTopLeft = _layoutRect!.center -
+        (_layoutRect!.center - newCropRect.topLeft) * scale;
+    final Offset cropBottomRight = _layoutRect!.center +
+        -(_layoutRect!.center - newCropRect.bottomRight) * scale;
+
+    cropRect =
+        Rect.fromPoints(cropTopLeft, cropBottomRight).shift(-layoutTopLeft!);
     _screenDestinationRect = newScreenDestinationRect;
     totalScale *= scale;
     preTotalScale = totalScale;
@@ -377,7 +393,7 @@ class EditorConfig {
     this.animationDuration = const Duration(milliseconds: 200),
     this.tickerDuration = const Duration(milliseconds: 400),
     this.cropAspectRatio = CropAspectRatios.custom,
-    this.initialCropAspectRatio = CropAspectRatios.custom,
+    this.initialCropAspectRatio = CropAspectRatios.ratio1_4,
     this.initCropRectType = InitCropRectType.imageRect,
     this.cropLayerPainter = const EditorCropLayerPainter(),
     this.speed = 1.0,
@@ -436,14 +452,9 @@ class EditorConfig {
   /// but it might be relevant with states (e.g. [ExtendedImageState]).
   final double? cropAspectRatio;
 
-  /// Initial Aspect ratio of crop rect
-  /// default is custom
-  ///
-  /// The argument only affects the initial aspect ratio,
-  /// users can set it based on the desire despite of [cropAspectRatio].
-  final double? initialCropAspectRatio;
+  final double initialCropAspectRatio;
 
-  /// Init crop rect base on initial image rect or image layout rect
+  /// init crop rect base on initial image rect or image layout rect
   final InitCropRectType initCropRectType;
 
   /// Custom crop layer
@@ -469,6 +480,10 @@ class CropAspectRatios {
 
   /// ratio of width and height is 1 : 1
   static const double ratio1_1 = 1.0;
+
+  static const double ratio1_4 = 1.0 / 4.0;
+
+  static const double ratio4_1 = 4.0 / 1.0;
 
   /// ratio of width and height is 3 : 4
   static const double ratio3_4 = 3.0 / 4.0;

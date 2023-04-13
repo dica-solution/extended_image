@@ -64,6 +64,8 @@ class ExtendedImageEditorState extends State<ExtendedImageEditor> {
               widget.extendedImageState.extendedImageInfo!.image.height;
     }
     _editActionDetails!.cropAspectRatio = _editorConfig!.cropAspectRatio;
+    _editActionDetails!.initialCropAspectRatio =
+        _editorConfig!.initialCropAspectRatio;
 
     if (_editorConfig!.cropAspectRatio != null &&
         _editorConfig!.cropAspectRatio! <= 0) {
@@ -102,8 +104,8 @@ class ExtendedImageEditorState extends State<ExtendedImageEditor> {
     );
 
     Widget result = GestureDetector(
-        onScaleStart: _handleScaleStart,
-        onScaleUpdate: _handleScaleUpdate,
+        // onScaleStart: _handleScaleStart,
+        // onScaleUpdate: _handleScaleUpdate,
         behavior: _editorConfig!.hitTestBehavior,
         child: Stack(
           children: <Widget>[
@@ -191,10 +193,17 @@ class ExtendedImageEditorState extends State<ExtendedImageEditor> {
   }
 
   Rect _initCropRect(Rect rect) {
-    if (_editActionDetails!.cropAspectRatio != null) {
-      return _calculateCropRectFromAspectRatio(
-        rect,
-        _editActionDetails!.cropAspectRatio!,
+    Rect cropRect = _editActionDetails!.getRectWithScale(rect);
+
+    if (_editActionDetails!.initialCropAspectRatio != null) {
+      final double aspectRatio = _editActionDetails!.initialCropAspectRatio!;
+      double width = cropRect.width / aspectRatio;
+      final double height = min(cropRect.height, width);
+      width = height * aspectRatio;
+      cropRect = Rect.fromCenter(
+        center: cropRect.center,
+        width: max(width - 24, 24),
+        height: max(height - 24, 24),
       );
     }
     if (_editorConfig!.initialCropAspectRatio != null) {
