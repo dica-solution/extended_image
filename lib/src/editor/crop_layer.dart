@@ -518,22 +518,6 @@ class ExtendedImageCropLayerState extends State<ExtendedImageCropLayer>
     }
 
     return;
-    _timer = Timer.periodic(widget.editorConfig.tickerDuration, (Timer timer) {
-      _timer?.cancel();
-
-      //move to center
-      final Rect? oldScreenCropRect = widget.editActionDetails.screenCropRect;
-
-      final Rect centerCropRect = getDestinationRect(
-          rect: layoutRect, inputSize: cropRect!.size, fit: widget.fit);
-      final Rect newScreenCropRect =
-          centerCropRect.shift(widget.editActionDetails.layoutTopLeft!);
-
-      _rectAnimation = _rectTweenController.drive<Rect?>(
-          RectTween(begin: oldScreenCropRect, end: newScreenCropRect));
-      _rectTweenController.reset();
-      _rectTweenController.forward();
-    });
   }
 
   void _doCropAutoCenterAnimation({Rect? newScreenCropRect}) {
