@@ -19,6 +19,7 @@ const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 const ScrollPhysics _defaultScrollPhysics = NeverScrollableScrollPhysics();
 
 final PageMetrics _testPageMetrics = PageMetrics(
+  devicePixelRatio: 0.25,
   axisDirection: AxisDirection.down,
   minScrollExtent: 0,
   maxScrollExtent: 10,

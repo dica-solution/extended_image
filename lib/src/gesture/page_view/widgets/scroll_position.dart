@@ -122,7 +122,7 @@ class ExtendedPagePosition extends ScrollPositionWithSingleContext
 
   @override
   void saveScrollOffset() {
-    PageStorage.of(context.storageContext)?.writeState(context.storageContext,
+    PageStorage.of(context.storageContext).writeState(context.storageContext,
         _cachedPage ?? getPageFromPixels(pixels, viewportDimension));
   }
 
@@ -130,7 +130,7 @@ class ExtendedPagePosition extends ScrollPositionWithSingleContext
   void restoreScrollOffset() {
     if (!hasPixels) {
       final double? value = PageStorage.of(context.storageContext)
-          ?.readState(context.storageContext) as double?;
+          .readState(context.storageContext) as double?;
       if (value != null) {
         _pageToUseOnStartup = value;
       }
@@ -211,6 +211,7 @@ class ExtendedPagePosition extends ScrollPositionWithSingleContext
 
   @override
   PageMetrics copyWith({
+    double? devicePixelRatio,
     double? minScrollExtent,
     double? maxScrollExtent,
     double? pixels,
@@ -219,6 +220,7 @@ class ExtendedPagePosition extends ScrollPositionWithSingleContext
     double? viewportFraction,
   }) {
     return PageMetrics(
+      devicePixelRatio: 0.25,
       minScrollExtent: minScrollExtent ??
           (hasContentDimensions ? this.minScrollExtent : null),
       maxScrollExtent: maxScrollExtent ??

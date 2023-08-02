@@ -205,14 +205,12 @@ class ExtendedImageEditorState extends State<ExtendedImageEditor> {
         width: max(width - 24, 24),
         height: max(height - 24, 24),
       );
-    }
-    if (_editorConfig!.initialCropAspectRatio != null) {
       return _calculateCropRectFromAspectRatio(
-        rect,
-        _editorConfig!.initialCropAspectRatio!,
+        cropRect,
+        _editorConfig!.initialCropAspectRatio,
       );
     }
-    return _editActionDetails!.getRectWithScale(rect);
+    return _editActionDetails!.getRectWithScale(cropRect);
   }
 
   Rect _calculateCropRectFromAspectRatio(Rect rect, double aspectRatio) {
