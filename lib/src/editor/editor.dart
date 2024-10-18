@@ -17,8 +17,10 @@ import 'editor_utils.dart';
 
 class ExtendedImageEditor extends StatefulWidget {
   ExtendedImageEditor({required this.extendedImageState, Key? key})
-      : assert(extendedImageState.imageWidget.fit == BoxFit.contain,
-            'Make sure the image is all painted to crop,the fit of image must be BoxFit.contain'),
+      : assert(
+            extendedImageState.imageWidget.fit == BoxFit.contain ||
+                extendedImageState.imageWidget.fit == BoxFit.fill,
+            'Make sure the image is all painted to crop,the fit of image must be BoxFit.contain or BoxFit.fill'),
         assert(extendedImageState.imageWidget.image is ExtendedImageProvider,
             'Make sure the image provider is ExtendedImageProvider, we will get raw image data from it'),
         super(key: key);
@@ -169,7 +171,7 @@ class ExtendedImageEditorState extends State<ExtendedImageEditor> {
                   _editorConfig!,
                   layoutRect,
                   key: _layerKey,
-                  fit: BoxFit.contain,
+                  fit: extendedImage.fit ?? BoxFit.contain,
                 );
               }),
             ),
